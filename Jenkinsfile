@@ -1,38 +1,66 @@
 pipeline {
-    agent any 
+    agent any
 
     environment {
         AWS_REGION = "us-east-2"
         CLUSTER_NAME = "eks-cluster"
 
         AWS_ACCOUNT_ID = "047385030300"
-          
+
         FRONTEND_REPO = "047385030300.dkr.ecr.us-east-2.amazonaws.com/frontend"
         BACKEND_REPO = "047385030300.dkr.ecr.us-east-2.amazonaws.com/backend"
-   }
+    }
 
-   stages {
+    stages {
 
-       stage('Checkout') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
-       }
+        }
 
-       stage('Build Frontend') {
-           steps {
-               sh 'docker build -t frontend ./frontend'
-           }
-       }
+        stage('Build Frontend') {
+            steps {
+                sh 'docker build -t frontend ./frontend'
+            }
+        }
 
-       stage('Build Backend') {
-           steps {
-               sh 'docker build -t backend ./backend'
-           }
-       }
+        stage('Build Backend') {
+            steps {
+                sh 'docker build -t backend ./backend'
+            }    
+        }
 
-       stage('Login to ECR') {
-           steps {
-               sh '''
-               aws ecr get-login-password --region us-east-2 | \
-               docker login --user
+        stage('Login to ECR') {
+            steps {
+                sh '''
+                docker tag frontend:latest $FRONTEND_REPO:latest
+                docker tag backend:latest $BACKEND_REPO:latest
+                '''
+            }
+        }
+
+        stage('Deploy to EKS') {
+            steps {
+                sh '''
+                aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+
+                kubectl apply -f k8s/
+
+                kubectl rollout restart deployment frontend
+                kubectl rollout restart deployment backend 
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Application deployed successfully"
+        }
+
+        failure {
+            echo "Pipeline failed"
+        }
+    }    
+}
