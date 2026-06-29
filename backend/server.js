@@ -1,10 +1,12 @@
-const express = require('express');
+const express = require("express");
 const app = express();
 
-app.get('/', (req, res) => {
-  res.send("Backend is running");
+app.get("/api", (req, res) => {
+    res.json({
+        message: "Hello from Backend running on EKS 🚀"
+    });
 });
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+app.listen(3000, () => {
+    console.log("Server running on port 3000");
 });

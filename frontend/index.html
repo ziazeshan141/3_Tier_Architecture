@@ -1,5 +1,34 @@
+<!DOCTYPE html>
 <html>
+<head>
+<title>Three Tier App</title>
+</head>
+
 <body>
-<h1>CI/CD Pipeline Working Successfully</h1>
+
+<h1>Frontend Running on EKS 🚀</h1>
+
+<button onclick="getMessage()">Call Backend</button>
+
+<h2 id="result"></h2>
+
+<script>
+
+function getMessage(){
+
+fetch("http://backend-service:3000/api")
+
+.then(response => response.json())
+
+.then(data => {
+
+document.getElementById("result").innerHTML=data.message;
+
+});
+
+}
+
+</script>
+
 </body>
 </html>
